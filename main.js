@@ -1,233 +1,246 @@
-        const canvas = document.getElementById("canvas");
-        var ctx = canvas.getContext("2d");
+const canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
 
-        class NPC {
-            constructor(info, location, spriteImg) {
-                this.info = info;
-                this.location = location;
-                this.sprite = {
-                    img: new Image(),
-                    width: 264,
-                    height: 264,
-                    x: 0,
-                    y: 0,
-                    rows: 4,
-                    columns: 4,
-                    frame: {
-                        width: 64,
-                        height: 64,
-                        cur: 0,
-                        count: 4,
-                    },
-                };
-                this.sprite.img.src = spriteImg;
-                this.state = {
-                    direction: {
-                        front: 0,
-                        left: 1,
-                        right: 2,
-                        back: 3,
-                    },
-                    isMoving: false,
-                };
-            }
+//imports
 
-            draw() {
-                ctx.beginPath();
-                ctx.drawImage(
-                    this.sprite.img,
-                    this.sprite.x, this.sprite.y,
-                    this.sprite.frame.width, this.sprite.frame.height,
-                    this.location.x, this.location.y,
-                    this.sprite.frame.width, this.sprite.frame.height
-                );
-            }
+import { player } from "./imports/player.js";
 
-            move(d) {
-                if (d !== "") {
-                    this.state.isMoving = true;
-                }
-                if (this.state.isMoving) {
-                    if (d === "right") {
-                        this.location.x += 8;
-                        this.sprite.y = this.state.direction.right * this.sprite.frame.height;
-                    }
-                    if (d === "left") {
-                        this.location.x -= 8;
-                        this.sprite.y = this.state.direction.left * this.sprite.frame.height;
-                    }
-                    if (this.location.x % this.sprite.frame.width === 0 && this.location.y % this.sprite.frame.height === 0) {
-                        this.state.isMoving = false;
-                    }
-                }
-            }
-        }
+//classes
 
-        const player = {
-            location: {
-                x: 0,
-                y: 0,
+class NPC {
+    constructor(info, location, spriteImg) {
+        this.info = info;
+        this.location = location;
+        this.sprite = new Sprite(256, 256, 4, 4, spriteImg)
+        this.state = {
+            direction: {
+                front: 0,
+                left: 1,
+                right: 2,
+                back: 3,
             },
-            state: {
-                direction: {
-                    front: {
-                        state: false,
-                        row: 0,
-                    },
-                    left: {
-                        state: false,
-                        row: 1,
-                    },
-                    right: {
-                        state: false,
-                        row: 2,
-                    },
-                    back: {
-                        state: false,
-                        row: 3,
-                    },
-                },
-                isMoving: false,
-            },
-            sprite: {
-                img: new Image(),
-                width: 264,
-                height: 264,
-                x: 0,
-                y: 0,
-                rows: 4,
-                columns: 4,
-                frame: {
-                    width: 64,
-                    height: 64,
-                    cur: 0,
-                    count: 4,
-                },
-            },
-        };
+        }
+        this.move = [0, 0]
+    }
 
-        const marcos = new NPC({ nome: "marcos", type: "talker" }, { x: 256, y: 256 }, "./assets/enemy.png");
+    draw(){
+        ctx.beginPath();
+        ctx.drawImage(
+            this.sprite.img,
+            this.sprite.x, this.sprite.y,
+            this.sprite.frame.width, this.sprite.frame.height,
+            this.location.x, this.location.y,
+            this.sprite.frame.width, this.sprite.frame.height
+        );
+    }
 
-        function setup() {
-            document.addEventListener("keydown", (k) => {
-                switch (k.key) {
-                    case "d":
-                    case "ArrowRight":
-                        player.state.isMoving = true;
-                        player.state.direction.right.state = true;
-                        break;
-                    case "a":
-                    case "ArrowLeft":
-                        player.state.isMoving = true;
-                        player.state.direction.left.state = true;
-                        break;
-                    case "s":
-                    case "ArrowDown":
-                        player.state.isMoving = true;
-                        player.state.direction.front.state = true;
-                        break;
-                    case "w":
-                    case "ArrowUp":
-                        player.state.isMoving = true;
-                        player.state.direction.back.state = true;
-                        break;
-                }
-            });
+    moving(obj, moveList) {
+        if(this.move[1] == 8){
+            this.move[0]++
+            this.move[1] = 0
+            obj.sprite.moveHorizontal(2)
+        }
+        if(this.move[0] == moveList.length){
+            this.move[0] = 0
+        }
+        switch (moveList[this.move[0]]) {
+            case 1:
+                this.location.x += 8;
+                changeDirection(obj, this.state.direction.right)
+                break;
+            case 2:
+                this.location.x -= 8;
+                changeDirection(obj, this.state.direction.left)
+                break;
+            case 3:
+                this.location.y -= 8;
+                changeDirection(obj, this.state.direction.back)
+                break;
+            case 4:
+                this.location.y += 8;
+                changeDirection(obj, this.state.direction.front)
+                break;
+        }
+        this.move[1]++           
+    }
+}
 
-            player.sprite.img.src = "./assets/sprites.png";
-            player.sprite.img.onload = function() {
-                draw();
-            };
+
+class Talker extends NPC {
+    constructor(info, location, spriteImg){
+        super(info, location, spriteImg)
+    }
+}
+
+class Sprite{
+    constructor(width, height, rows, columns, img){
+        this.img = new Image()
+        this.width = width
+        this.height = height
+        this.x = 0
+        this.y = 0
+        this.rows = rows
+        this.columns = columns
+        this.frame = {
+            width: (width/rows),
+            height: (height/columns),
+            row: 1,
+            column: 1,
+        }
+        this.img.src = img
+    }
+
+    moveHorizontal(n){
+        if(n > this.rows){return;}
+        this.x = n * this.frame.width
+    }
+
+    moveVertical(n){
+        if(n > this.columns){return;}
+        this.y = n * this.frame.height
+    }
+}
+
+//variables
+
+const marcos = new NPC({ nome: "marcos", type: "talker" }, { x: 256, y: 256 }, "./assets/enemy.png");
+let moveList = [
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+]
+let index = 0
+
+//util functions
+
+function moving() {
+    if(!((player.location.x > 896) ||
+       (player.location.x < 0) ||
+       (player.location.y > 640) ||
+       (player.location.y < 0))){
+        if(player.location.x % 64 === 0 && player.location.y % 64 === 0){
+            player.state.isMoving = false;
+            DirectionAtt(player, "")
+            player.sprite.moveHorizontal(2)
         }
 
-        let moveList = [
-            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-        ]
-        let index = 0
-
-        function marcosMove() {
-            if (index >= moveList.length) {
-                index = 0;
-            }
-            let m = moveList[index]
-            if (m == 1) {
-                marcos.move("right")
-            }
-            if (m == 2) {
-                marcos.move("left")
-            }
-            index++
+        if (player.state.direction.right.state) {
+            player.location.x += 8;
+            changeDirection(player, player.state.direction.right.row)
         }
-
-        setup();
-
-        function updateFrame() {
-            player.sprite.frame.cur = ++player.sprite.frame.cur % player.sprite.frame.count;
-            player.sprite.x = player.sprite.frame.cur * player.sprite.frame.width;
+        if (player.state.direction.left.state) {
+            player.location.x -= 8;
+            changeDirection(player, player.state.direction.left.row)
         }
-
-        function changeDirection(d) {
-            player.sprite.y = d.row * player.sprite.frame.height;
+        if (player.state.direction.front.state) {
+            player.location.y += 8;
+            changeDirection(player, player.state.direction.front.row)
         }
+        if (player.state.direction.back.state) {
+            player.location.y -= 8;
+            changeDirection(player, player.state.direction.back.row)
+        }
+        player.location.last.x = player.location.x
+        player.location.last.y = player.location.y
+    }
+    else {
+        player.state.isMoving = false;
+        DirectionAtt(player, "")
+        player.location.x = player.location.last.x 
+        player.location.y = player.location.last.y 
+    }
+}
 
-        function moving() {
-            if (player.state.direction.right.state && player.state.direction.left.state) { player.state.direction.left.state = false; }
-            if (player.state.direction.back.state && player.state.direction.front.state) { player.state.direction.front.state = false; }
-            if (player.state.direction.back.state && (player.state.direction.right.state || player.state.direction.left.state)) {
-                player.state.direction.right.state = false;
-                player.state.direction.left.state = false;
-            }
-            if (player.state.direction.front.state && (player.state.direction.right.state || player.state.direction.left.state)) {
-                player.state.direction.right.state = false;
-                player.state.direction.left.state = false;
-            }
-            if (player.state.direction.right.state) {
-                player.location.x += 8;
-                changeDirection(player.state.direction.right);
-            }
-            if (player.state.direction.left.state) {
-                player.location.x -= 8;
-                changeDirection(player.state.direction.left);
-            }
-            if (player.state.direction.front.state) {
-                player.location.y += 8;
-                changeDirection(player.state.direction.front);
-            }
-            if (player.state.direction.back.state) {
-                player.location.y -= 8;
-                changeDirection(player.state.direction.back);
-            }
-            if (player.location.x % 64 === 0 && player.location.y % 64 === 0) {
-                player.state.direction.right.state = false;
-                player.state.direction.left.state = false;
-                player.state.direction.front.state = false;
-                player.state.direction.back.state = false;
-                player.state.isMoving = false;
+
+function DirectionAtt(obj, direction){
+    obj.state.direction.right.state = false
+    obj.state.direction.left.state = false
+    obj.state.direction.back.state = false
+    obj.state.direction.front.state = false
+
+    switch (direction) {
+        case "right":
+            obj.state.direction.right.state = true
+            break;
+        case "left":
+            obj.state.direction.left.state = true
+            break;
+        case "back":
+            obj.state.direction.back.state = true
+            break;
+        case "front":
+            obj.state.direction.front.state = true
+            break;
+    }
+}
+
+function changeDirection(obj, y){
+    let x = (obj.sprite.x / obj.sprite.frame.width) + 1 == obj.sprite.columns ? 1  : (obj.sprite.x / obj.sprite.frame.width) + 1 
+    obj.sprite.moveHorizontal(x)
+    obj.sprite.moveVertical(y)
+}
+
+//game functions
+
+function setup() {
+    document.addEventListener("keydown", (k) => {
+        if (!player.state.isMoving){
+            switch (k.key) {
+                case "d":
+                case "ArrowRight":
+                    player.state.isMoving = true;
+                    DirectionAtt(player, "right")
+                    player.location.x += 8
+                    break;
+                case "a":
+                case "ArrowLeft":
+                    player.state.isMoving = true;
+                    DirectionAtt(player, "left")
+                    player.location.x -= 8
+                    break;
+                case "s":
+                case "ArrowDown":
+                    player.state.isMoving = true;
+                    DirectionAtt(player, "front")
+                    player.location.y += 8
+                    break;
+                case "w":
+                case "ArrowUp":
+                    player.state.isMoving = true;
+                    DirectionAtt(player, "back")
+                    player.location.y -= 8
+                    break;
             }
         }
+    });
 
-        function draw() {
-            if (player.state.isMoving) {
-                updateFrame();
-                moving();
-            }
+    player.sprite = new Sprite(256, 256, 4, 4, "./assets/sprites.png")
+    player.sprite.img.onload = function() {
+        draw();
+    };
+}
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+setup();
 
-            ctx.beginPath();
-            ctx.drawImage(
-                player.sprite.img,
-                player.sprite.x, player.sprite.y,
-                player.sprite.frame.width, player.sprite.frame.height,
-                player.location.x, player.location.y,
-                player.sprite.frame.width, player.sprite.frame.height
-            );
 
-            marcos.draw();
 
-            marcosMove()
 
-            requestAnimationFrame(draw);
-        }
-            
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    moving();
+
+    ctx.beginPath();
+    ctx.drawImage(
+        player.sprite.img,
+        player.sprite.x, player.sprite.y,
+        player.sprite.frame.width, player.sprite.frame.height,
+        player.location.x, player.location.y,
+        player.sprite.frame.width, player.sprite.frame.height
+    );
+
+    marcos.draw();
+    marcos.moving(marcos, [0, 1, 0, 1, 0, 1, 0, 2, 0, 2, 0, 2, 0])
+
+    requestAnimationFrame(draw);
+}
+    
