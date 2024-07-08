@@ -2,7 +2,9 @@ export const player = {
     location: {
         x: 0,
         y: 0,
-        last: {x: 0, y: 0},
+        lastGrid: {x: 0, y: 0},
+        nowGrid: {x:0, y: 0},
+        futureGrid: {x: 0, y: 0},
     },
     state: {
         direction: {
@@ -12,7 +14,7 @@ export const player = {
             },
             left: {
                 state: false,
-                row: 1,
+                row: 3,
             },
             right: {
                 state: false,
@@ -20,7 +22,7 @@ export const player = {
             },
             back: {
                 state: false,
-                row: 3,
+                row: 1,
             },
         },
         isMoving: false,
