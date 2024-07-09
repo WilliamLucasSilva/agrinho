@@ -4,6 +4,8 @@ const pause = document.getElementById("pause")
 
 import variables from "./imports/useful/variables.js";
 import { changeDirection } from "./imports/useful/changeDirection.js";
+import { grid } from "./imports/useful/grid.js";
+import { attGridPosition } from "./imports/useful/attGridPosition.js";
 
 import { player } from "./imports/objects/npc/player.js";
 import { NPC } from "./imports/objects/npc/npc.js";
@@ -12,33 +14,16 @@ import { Sprite } from "./imports/objects/sprite.js";
 //variables
 
 const marcos = new NPC({ nome: "marcos", type: "talker" }, 
-                { x: 256, y: 256, lastGrid: {x: 3, y: 3}, nowGrid: {x: 3, y: 3}, futureGrid: {x: 3, y: 3}, gridNumber: 3}, 
+                { x: 192, y: 192, lastGrid: {x: 3, y: 3}, nowGrid: {x: 3, y: 3}, futureGrid: {x: 3, y: 3}, gridNumber: 3}, 
                 new Sprite(256, 256, 4, 4, "./assets/enemy.png"));
 
-var grid = [
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-]
 let paused = false;
-const GRID_SPACE = 64
+
 
 //useful functions
 
 function moving() {
-        if(player.location.x % GRID_SPACE === 0 && player.location.y % GRID_SPACE === 0){
+        if(player.location.x % variables.GRID_SPACE === 0 && player.location.y % variables.GRID_SPACE === 0){
 
             player.state.isMoving = false;
             DirectionAtt(player, "")
@@ -76,19 +61,11 @@ function moving() {
         }
 
         if(playerCollision(player.location.futureGrid)){
-            player.location.x = player.location.lastGrid.x * GRID_SPACE
-            player.location.y = player.location.lastGrid.y * GRID_SPACE 
+            player.location.x = player.location.lastGrid.x * variables.GRID_SPACE
+            player.location.y = player.location.lastGrid.y * variables.GRID_SPACE 
             player.location.futureGrid.x = player.location.nowGrid.x
             player.location.futureGrid.y = player.location.nowGrid.y
         }
-}
-
-function attGridPosition(position, type){
-    if(type === "negative"){
-        return Math.floor(position / GRID_SPACE)
-    }else{
-        return Math.ceil(position / GRID_SPACE)
-    }
 }
 
 function DirectionAtt(obj, direction){
@@ -114,7 +91,7 @@ function DirectionAtt(obj, direction){
 }
 
 function playerCollision(position){
-    return (grid[position.x][position.y] == 3)
+    return (grid[position.x][position.y] > 1)
 }
 
 function showGrid() {
@@ -203,11 +180,7 @@ function draw() {
         marcos.moving(marcos, [0, 1, 0, 1, 0, 1, 0, 2, 0, 2, 0, 2, 0])
 
         if(player.state.isMoving){
-            //console.log(player.location.lastGrid.x, player.location.lastGrid.y)
-            showGrid()
-            console.log(playerCollision(player.location.futureGrid))
         }
-        grid[3][3] = 3
     }else{
         variables.ctx.clearRect(0, 0, variables.canvas.width, variables.canvas.height);
     }

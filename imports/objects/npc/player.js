@@ -1,10 +1,10 @@
 export const player = {
     location: {
-        x: 0,
-        y: 0,
-        lastGrid: {x: 0, y: 0},
-        nowGrid: {x:0, y: 0},
-        futureGrid: {x: 0, y: 0},
+        x: 64,
+        y: 128,
+        lastGrid: {x: 1, y: 2},
+        nowGrid: {x: 1, y: 2},
+        futureGrid: {x: 1, y: 2},
     },
     state: {
         direction: {
